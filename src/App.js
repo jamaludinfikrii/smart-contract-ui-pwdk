@@ -6,14 +6,14 @@ import detectEthereumProvider from '@metamask/detect-provider';
 
 function App() {
   const [provider, setProvider] = useState();
-  const [address, setAddress] = useState();
+  const [walletAddress, setWaletAddress] = useState();
 
   useEffect(() => {
     const checkConnectedWallet = async () => {
       const signer = provider.getSigner();
       try {
         const address = await signer.getAddress();
-        setAddress(address);
+        setWaletAddress(address);
       } catch (e) {
         console.error(e.message);
       }
@@ -46,7 +46,7 @@ function App() {
       await provider.send('eth_requestAccounts', []);
       const signer = provider.getSigner();
       const address = await signer.getAddress();
-      setAddress(address);
+      setWaletAddress(address);
     } catch (e) {
       alert(e.message);
     }
@@ -56,19 +56,19 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <button onClick={connectToWallet}>
-          Connect to Metamask
-        </button>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
+        {
+          !walletAddress &&
+          <button onClick={connectToWallet}>
+            Connect to Metamask
+          </button>
+        }
         <a
           className="App-link"
           href="https://reactjs.org"
           target="_blank"
           rel="noopener noreferrer"
         >
-          { address && <span>Your address: {address}</span> }
+          { walletAddress && <span>Your address: {walletAddress}</span> }
         </a>
       </header>
     </div>
