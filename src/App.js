@@ -19,8 +19,16 @@ function App() {
       }
     }
 
+    const listenToWalletAddressChange = async () => {
+      const ethProvider = await detectEthereumProvider();
+      ethProvider.on('accountsChanged', (accounts) => {
+        setWaletAddress(accounts[0]);
+      });
+    }
+
     if (provider) {
       checkConnectedWallet();
+      listenToWalletAddressChange();
     }
   }, [provider]);
 
