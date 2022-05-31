@@ -25,6 +25,7 @@ const networkMap = {
 function App() {
   const [provider, setProvider] = useState();
   const [walletAddress, setWaletAddress] = useState();
+  const [chainId, setChainId] = useState();
 
   useEffect(() => {
     const checkConnectedWallet = async () => {
@@ -32,6 +33,9 @@ function App() {
       try {
         const address = await signer.getAddress();
         setWaletAddress(address);
+        const ethProvider = await detectEthereumProvider();
+        const chainId =  Number(ethProvider.networkVersion);
+        setChainId(chainId);
       } catch (e) {
         console.error(e.message);
       }
@@ -44,9 +48,17 @@ function App() {
       });
     }
 
+    const listenToChainIdChange = async () => {
+      const ethProvider = await detectEthereumProvider();
+      ethProvider.on('chainChanged', (chainId) => {
+        setChainId(Number(chainId));
+      });
+    }
+
     if (provider) {
       checkConnectedWallet();
       listenToWalletAddressChange();
+      listenToChainIdChange();
     }
   }, [provider]);
 
@@ -112,6 +124,8 @@ function App() {
         <button onClick={switchToMumbai}>
           Switch To Mumbai
         </button>
+
+        { chainId && <span>ChainId: {chainId}</span> }
       </header>
     </div>
   );
