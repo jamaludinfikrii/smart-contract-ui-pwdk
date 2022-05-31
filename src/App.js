@@ -9,6 +9,22 @@ function App() {
   const [address, setAddress] = useState();
 
   useEffect(() => {
+    const checkConnectedWallet = async () => {
+      const signer = provider.getSigner();
+      try {
+        const address = await signer.getAddress();
+        setAddress(address);
+      } catch (e) {
+        console.error(e.message);
+      }
+    }
+
+    if (provider) {
+      checkConnectedWallet();
+    }
+  }, [provider]);
+
+  useEffect(() => {
     const initProvider = async () => {
       const ethProvider = await detectEthereumProvider();
       if (!ethProvider) {
@@ -52,9 +68,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {
-            address && <span>Your address: {address}</span>
-          }
+          { address && <span>Your address: {address}</span> }
         </a>
       </header>
     </div>
