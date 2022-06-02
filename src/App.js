@@ -22,6 +22,7 @@ function App() {
   const [privateSaleEnd, setPrivateSaleEnd] = useState();
   const [isUserWhitlisted, setIsUserWhitlisted] = useState(false);
   const [isUserHasMinted, setIsUserHasMinted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [contract, setContract] = useState();
 
@@ -49,16 +50,50 @@ function App() {
 
       const _privateSaleStartTimestamp = await contract.privateSaleStartTimestamp()
       const _privateSaleEndTimestamp = await contract.privateSaleEndTimestamp()
+      const _addressToMintQty = await contract.addressToMintQty(walletAddress);
+      const _addressToDoneMinting = await contract.addressToDoneMinting(walletAddress);
 
       console.log(_privateSaleEndTimestamp.toNumber())
       console.log(_privateSaleStartTimestamp.toNumber())
+      console.log(_addressToMintQty.toNumber())
+      console.log(_addressToDoneMinting)
+
+      setPrivateSaleEnd(_privateSaleEndTimestamp.toNumber())
+      setPrivateSaleStart(_privateSaleStartTimestamp.toNumber())
+      setIsUserWhitlisted(_addressToMintQty.toNumber() > 0 && !_addressToDoneMinting)
+      setIsUserHasMinted(_addressToDoneMinting)
+      setIsLoading(false)
 
     }
 
-    if (contract) {
+    if (contract && walletAddress) {
       getInitData()
     }
-  }, [contract])
+  }, [contract, walletAddress])
+
+  const getProperMessage = () => {
+    const now = new Date().getTime() / 1000;
+    const isNowPresale = now > privateSaleStart && now < privateSaleEnd;
+
+    console.log('now < priv',now < privateSaleStart)
+
+    if (now < privateSaleStart) {
+      return `Private Sale is not started yet, come back here at ${new Date(privateSaleStart * 1000).toLocaleString()}`
+    }
+
+    if (isNowPresale && !isUserWhitlisted) {
+      return `You are not whitelisted yet, come back here at ${new Date(privateSaleEnd * 1000).toLocaleString()}`
+    }
+
+    if (isNowPresale && isUserWhitlisted && !isUserHasMinted) {
+      return `You are whitelisted, now you can mint your tokens`
+    }
+
+    if (isNowPresale && isUserWhitlisted && isUserHasMinted) {
+      return `You have already minted your tokens`
+    }
+
+  }
 
 
 
@@ -87,11 +122,17 @@ function App() {
           )
         }
         { chainId && <span>ChainId: {chainId}</span> }
+        {
+          isLoading ? 'Loading...' : (
+            <div style={{backgroundColor:'red', padding:'10px'}}>
+              {
+                getProperMessage()
+              }
+            </div>
+          )
+        }
       </header>
 
-      <div>
-
-      </div>
     </div>
   );
 }
