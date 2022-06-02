@@ -1,16 +1,13 @@
-import logo from './logo.svg';
 import './App.css';
 import { useWallet } from './context/WalletContext'
-import Abi from './abi/erc721Starter.json'
-import { ethers } from 'ethers'
 import { useEffect, useState } from 'react';
+import { useContract } from './context/ContractContext';
 
 
 
 function App() {
 
   const {
-    provider,
     walletAddress,
     connectToWallet,
     isShowConnectMumbaiBtn,
@@ -18,30 +15,16 @@ function App() {
     chainId
   } = useWallet();
 
+  const {
+    contract,
+  } = useContract()
+
   const [privateSaleStart, setPrivateSaleStart] = useState();
   const [privateSaleEnd, setPrivateSaleEnd] = useState();
   const [isUserWhitlisted, setIsUserWhitlisted] = useState(false);
   const [isUserHasMinted, setIsUserHasMinted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [contract, setContract] = useState();
-
-  useEffect(() => {
-    const initContract = async () => {
-      const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
-      const contract = new ethers.Contract(
-        contractAddress,
-        Abi.abi,
-        provider
-      )
-      setContract(contract)
-    }
-
-    if (provider) {
-      initContract()
-    }
-
-  }, [provider])
 
   useEffect(() => {
     const getInitData = async () => {
